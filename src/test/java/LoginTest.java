@@ -1,9 +1,12 @@
 import helpers.PropertiesReader;
+import helpers.PropertiesWriter;
 import helpers.TestConfig;
 import models.AuthenticationRequestModel;
+import models.AuthenticationResponseModel;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -14,15 +17,15 @@ public class LoginTest {
     public void loginPositive() throws IOException {
         // AuthenticationRequestModel класс представляет модель запроса аутентификации.
         AuthenticationRequestModel requestModel = AuthenticationRequestModel
-                .username("myemail5@mail.com")
-                .password("Tt123456$");
+                .username(PropertiesReader.getProperty("existingUserEmail"))
+                .password(PropertiesReader.getProperty("existingUserPassword"));
         // // Создается экземпляр класса AuthenticationRequestModel с заданными данными пользователя для аутентификации (email и пароль).
         RequestBody requestBody = RequestBody
                 .create(TestConfig.gson.toJson(requestModel),
                         TestConfig.JSON);
         // Создается объект RequestBody, содержащий данные запроса в формате JSON.
         Request request = new Request.Builder()
-                .url("https://contactapp-telran-backend.herokuapp.com/v1/user/login/usernamepassword")
+                .url(PropertiesReader.getProperty("loginPassword"))
                 .post(requestBody)
                 .build(); // Создается объект Request, представляющий HTTP POST-запрос к указанному URL с телом,
         // содержащим данные аутентификации. Класс Request является частью библиотеки OkHttp,
@@ -36,11 +39,15 @@ public class LoginTest {
         // client из класса TestConfig, и возвращается объект Response т.е. какой-то ответ.
 
        // если ответ содержит код 2** , то все прошло успешно.
-
+        System.out.println("Response code :" + response.code());
         if(response.isSuccessful()){
-            AuthenticationRequestModel responseModel =
+            AuthenticationResponseModel responseModel =
                     TestConfig.gson.fromJson(response.body().string(),
-                            AuthenticationRequestModel.class);
+                            AuthenticationResponseModel.class);
+            System.out.println(responseModel.getToken());
+            PropertiesWriter.writeProperties("token", responseModel.getToken(), false); // сохраняем токен
+
+            Assert.assertTrue(response.isSuccessful());
         }
         else {
             System.out.println("Error");
