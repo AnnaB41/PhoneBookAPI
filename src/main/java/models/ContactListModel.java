@@ -19,4 +19,12 @@ public class ContactListModel {
                 "contacts=" + contacts +
                 '}';
     }
+
+    public int countOfContact(){
+        if(contacts != null){
+            return contacts.size();
+        }
+        else return 0;
+    }
+
 }

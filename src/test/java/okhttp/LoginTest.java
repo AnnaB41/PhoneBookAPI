@@ -1,17 +1,20 @@
-import helpers.PropertiesReader;
-import helpers.PropertiesWriter;
-import helpers.TestConfig;
+package okhttp;
+
+import helpers.*;
 import models.AuthenticationRequestModel;
 import models.AuthenticationResponseModel;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import models.ErrorModel;
+import okhttp3.Request; // класс Request из библиотеки okhttp3 используется для создания HTTP-запросов.
+import okhttp3.RequestBody; //класс RequestBody из библиотеки okhttp3 представляет тело HTTP-запроса.
+import okhttp3.Response; // класс Response из библиотеки okhttp3 представляет ответ на HTTP-запрос.
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-public class LoginTest {
+import static helpers.TestHelper.gson;
+
+public class LoginTest implements TestHelper {
 
     @Test
     public void loginPositive() throws IOException {
@@ -19,15 +22,20 @@ public class LoginTest {
         AuthenticationRequestModel requestModel = AuthenticationRequestModel
                 .username(PropertiesReader.getProperty("existingUserEmail"))
                 .password(PropertiesReader.getProperty("existingUserPassword"));
+
         // // Создается экземпляр класса AuthenticationRequestModel с заданными данными пользователя для аутентификации (email и пароль).
         RequestBody requestBody = RequestBody
                 .create(TestConfig.gson.toJson(requestModel),
                         TestConfig.JSON);
+
+        System.out.println(requestBody);
+
         // Создается объект RequestBody, содержащий данные запроса в формате JSON.
         Request request = new Request.Builder()
-                .url(PropertiesReader.getProperty("loginPassword"))
+                .url("https://contactapp-telran-backend.herokuapp.com/v1/user/login/usernamepassword")
                 .post(requestBody)
                 .build(); // Создается объект Request, представляющий HTTP POST-запрос к указанному URL с телом,
+        //.url(PropertiesReader.getProperty("urlLogin"))
         // содержащим данные аутентификации. Класс Request является частью библиотеки OkHttp,
         // которая предоставляет удобный способ для работы с сетевыми запросами. в итоге у вас получается объект Request,
         // который готов к отправке на сервер с заданными параметрами: методом POST, URL-адресом и телом запроса.
@@ -50,13 +58,16 @@ public class LoginTest {
             Assert.assertTrue(response.isSuccessful());
         }
         else {
-            System.out.println("Error");
+            System.out.println("Status code : "+response.code());
+            ErrorModel errorModel = gson.fromJson(response.body().string(), ErrorModel.class);
+            System.out.println("\u001B[32mError status: "+errorModel.getStatus());
+            Assert.assertTrue(response.isSuccessful());
         }
 
     }
 
     @Test
-    public void loginPositiveWithProperties() throws IOException {
+    public void loginPositiveWithPropertiesXML() throws IOException {
        AuthenticationRequestModel requestModel = AuthenticationRequestModel
                 .username(PropertiesReader.getProperty("existingUserEmail"))
                 .password(PropertiesReader.getProperty("existingUserPassword"));
@@ -77,7 +88,10 @@ public class LoginTest {
                             AuthenticationRequestModel.class);
         }
         else {
-            System.out.println("Error");
+            System.out.println("Status code : "+response.code());
+            ErrorModel errorModel = gson.fromJson(response.body().string(), ErrorModel.class);
+            System.out.println("\u001B[32mError status: "+errorModel.getStatus());
+            Assert.assertTrue(response.isSuccessful());
         }
 
     }
