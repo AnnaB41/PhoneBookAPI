@@ -10,12 +10,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class addNewContactPositive implements TestHelper {
 
     String idResult;
     @Test
-            public void addNewContact() throws IOException {
+            public void addNewContact() throws IOException, SQLException {
     ContactModel contactModel = new ContactModel(NameAndLastNameGenerator.generateName(),
                             NameAndLastNameGenerator.generateLastName(),
                             EmailGenerator.generateEmail(8,3,2),
@@ -37,6 +38,10 @@ public class addNewContactPositive implements TestHelper {
 
     String responseMsg = contactResponseModel.getMessage();
     idResult = IdExtractor.extactId(responseMsg);
+
+    DataBaseConnection dataBaseConnection = new DataBaseConnection();
+    dataBaseConnection.contactDatabaseRecorder(idResult, contactModel);
+
         System.out.println("Message: " + idResult);
         Assert.assertTrue(response.isSuccessful());
 
@@ -44,7 +49,7 @@ public class addNewContactPositive implements TestHelper {
     }
 
     @Test
-   public void deleteContactByID() throws IOException {
+   public void deleteContactByID() throws IOException, SQLException {
                 addNewContact();
                 Request request= new Request.Builder()
                         .url(ADD_CONTACT_PATH+"/"+idResult)

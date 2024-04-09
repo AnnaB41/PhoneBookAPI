@@ -20,5 +20,7 @@ import okhttp3.OkHttpClient;
 
         public static final String TOKEN_KEY = "token";
 
+        public static final String LOGIN_PATH = "https://contactapp-telran-backend.herokuapp.com/v1/user/login/usernamepassword";
+
 
 }
